@@ -3,13 +3,16 @@ from django.contrib import messages
 import logging
 from .models import Producto
 from .forms import ProductoForm
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
+@login_required
 def lista_productos(request):
     productos = Producto.objects.all()
     return render(request, 'productos/lista.html', {'productos': productos})
 
+@login_required
 def crear_producto(request):
     if request.method == 'POST':
         logger.info("Recibiendo POST para crear producto")
@@ -34,6 +37,7 @@ def crear_producto(request):
         form = ProductoForm()
     return render(request, 'productos/form.html', {'form': form})
 
+@login_required
 def editar_producto(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     if request.method == 'POST':
@@ -48,6 +52,7 @@ def editar_producto(request, pk):
         form = ProductoForm(instance=producto)
     return render(request, 'productos/form.html', {'form': form})
 
+@login_required
 def eliminar_producto(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     if request.method == 'POST':
