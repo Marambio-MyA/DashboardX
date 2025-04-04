@@ -2,6 +2,10 @@
 .venv/
 venv/
 ENV/
+/bin
+/include
+/lib
+pyvenv.cfg
 
 # Base de datos
 *.sqlite3
