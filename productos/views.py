@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 import logging
-from .models import Producto
-from .forms import ProductoForm
+from .models import Producto,Categoria
+from .forms import ProductoForm, CategoriaForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
@@ -12,10 +12,62 @@ from reportlab.lib.pagesizes import letter
 logger = logging.getLogger(__name__)
 
 @login_required
-def lista_productos(request):
-    productos = Producto.objects.all()
-    return render(request, 'productos/lista.html', {'productos': productos})
+def home(request):
+    categorias = Categoria.objects.all()
 
+    # Filtrado de productos
+    productos = Producto.objects.all()
+
+    search = request.GET.get('search')
+    categoria_id = request.GET.get('categoria')
+    stock = request.GET.get('stock')
+
+    if search:
+        productos = productos.filter(nombre__icontains=search)
+
+    if categoria_id:
+        productos = productos.filter(categoria_id=categoria_id)
+
+    if stock:
+        productos = productos.filter(cantidad_disponible__gte=stock)
+
+    context = {
+        'productos': productos,
+        'categorias': categorias,
+    }
+
+    return render(request, 'home.html', context)
+
+@login_required
+def lista_productos(request):
+    nombre_busqueda = request.GET.get('nombre', '')
+    categoria_filtro = request.GET.get('categoria', '')
+    stock_filtro = request.GET.get('stock', '')
+
+    productos = Producto.objects.all()
+
+    if nombre_busqueda:
+        productos = productos.filter(nombre__icontains=nombre_busqueda)
+
+    if categoria_filtro:
+        productos = productos.filter(categoria__id=categoria_filtro)
+
+    if stock_filtro:
+        if stock_filtro == 'agotado':
+            productos = productos.filter(cantidad_disponible=0)
+        elif stock_filtro == 'disponible':
+            productos = productos.filter(cantidad_disponible__gt=0)
+
+    categorias = Categoria.objects.all()  # Para mostrar en el filtro
+
+    return render(request, 'productos/lista.html', {
+        'productos': productos,
+        'categorias': categorias,
+        'nombre_busqueda': nombre_busqueda,
+        'categoria_filtro': categoria_filtro,
+        'stock_filtro': stock_filtro
+    })
+    
 @login_required
 def crear_producto(request):
     if request.method == 'POST':
@@ -27,7 +79,7 @@ def crear_producto(request):
                 producto = form.save()
                 logger.info(f"Producto guardado exitosamente: {producto.nombre}")
                 messages.success(request, f'Producto "{producto.nombre}" creado exitosamente.')
-                return redirect('lista_productos')
+                return redirect('home')
             except Exception as e:
                 logger.error(f"Error al guardar producto: {str(e)}")
                 messages.error(request, f'Error al guardar el producto: {str(e)}')
@@ -49,7 +101,7 @@ def editar_producto(request, pk):
         if form.is_valid():
             producto = form.save()
             messages.success(request, f'Producto "{producto.nombre}" actualizado exitosamente.')
-            return redirect('lista_productos')
+            return redirect('home')
         else:
             messages.error(request, 'Por favor, corrija los errores en el formulario.')
     else:
@@ -63,7 +115,7 @@ def eliminar_producto(request, pk):
         nombre_producto = producto.nombre
         producto.delete()
         messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente.')
-        return redirect('lista_productos')
+        return redirect('home')
     return render(request, 'productos/confirmar_eliminar.html', {'producto': producto})
 
 @login_required
@@ -129,3 +181,37 @@ def reporte_inventario_pdf(request):
     p.showPage()
     p.save()
     return response
+
+@login_required
+def lista_categorias(request):
+    categorias = Categoria.objects.all()
+    return render(request, 'categoria/listar_categorias.html', {'categorias': categorias})
+
+@login_required
+def crear_categoria(request):
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = CategoriaForm()
+    return render(request, 'categoria/crear_categoria.html', {'form': form})
+
+@login_required
+def editar_categoria(request, pk):
+    categoria = Categoria.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST, instance=categoria)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = CategoriaForm(instance=categoria)
+    return render(request, 'categoria/editar_categoria.html', {'form': form, 'categoria': categoria})
+
+@login_required
+def eliminar_categoria(request, pk):
+    categoria = Categoria.objects.get(pk=pk)
+    categoria.delete()
+    return redirect('home')
