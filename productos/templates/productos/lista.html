@@ -12,10 +12,12 @@
             <h1>Lista de Productos</h1>
             {% if user.is_authenticated %}
                 <div>
+                    <a href="{% url 'reporte_pdf' %}" class="btn btn-success">Descargar Reporte PDF</a>
                     <span class="me-2">Hola, {{ user.username }}</span>
                     <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">Cerrar sesión</a>
                 </div>
             {% endif %}
+            
         </div>
 
         <!-- Mensajes -->
