@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('categoria', models.CharField(max_length=50)),
             ],
             options={
-                'constraints': [models.CheckConstraint(condition=models.Q(('cantidad_disponible__gte', 0)), name='cantidad_no_negativa'), models.CheckConstraint(condition=models.Q(('precio_unitario__gte', 0)), name='precio_no_negativo')],
+                'constraints': [models.CheckConstraint(check=models.Q(('cantidad_disponible__gte', 0)), name='cantidad_no_negativa'), models.CheckConstraint(check=models.Q(('precio_unitario__gte', 0)), name='precio_no_negativo')],
             },
         ),
     ]
