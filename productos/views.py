@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import logout
 from django.contrib import messages
 import logging
 from .models import Producto,Categoria
@@ -215,3 +216,8 @@ def eliminar_categoria(request, pk):
     categoria = Categoria.objects.get(pk=pk)
     categoria.delete()
     return redirect('home')
+
+
+def custom_logout(request):
+    logout(request)
+    return redirect('/login/?logout=1') 
