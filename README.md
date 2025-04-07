@@ -1,5 +1,10 @@
 # Sistema de Gestión de Productos DashboardX
 
+Pablo Marambio
+
+Franco Reinoso
+
+
 # Descripción del Proyecto
 
 Estamos encargados de la creación de **gestión de inventario** para una pequeña empresa, es decir, una aplicación para **registrar productos** y **actualizar estos** cuando sea necesario.
