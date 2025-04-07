@@ -6,6 +6,8 @@ ENV/
 /include
 /lib
 pyvenv.cfg
+/Scripts*
+productos/__pycache__*
 
 # Base de datos
 *.sqlite3

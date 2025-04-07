@@ -10,7 +10,7 @@ class Categoria(models.Model):
         return self.nombre
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
-    descripcion = models.TextField()
+    descripcion = models.TextField(max_length=255)
     cantidad_disponible = models.IntegerField()
     precio_unitario = models.IntegerField()
     categoria = models.ForeignKey(Categoria, related_name='productos', on_delete=models.SET_NULL, null=True, blank=True)
